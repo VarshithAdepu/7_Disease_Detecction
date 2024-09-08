@@ -1,0 +1,58 @@
+<!-- HTML File (index.html) -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Sheets Data Entry</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; }
+        input, button { display: block; width: 100%; margin: 10px 0; padding: 10px; }
+        button { background-color: #4CAF50; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #45a049; }
+    </style>
+</head>
+<body>
+    <h1>Enter Data for Google Sheets</h1>
+    <form id="dataForm">
+        <input type="text" id="name" placeholder="Name" required>
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="text" id="message" placeholder="Message" required>
+        <button type="submit">Submit</button>
+    </form>
+    <div id="status"></div>
+
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby4pWrty_2aEfNpJCCEWO9Tt_JoWBVdMrljcmGNQPaQe_x-z5j6R_Grhn5rbg6jFhbN/exec'; // Replace with your actual URL
+
+        document.getElementById('dataForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = 'Submitting...';
+            
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const message = document.getElementById('message').value;
+            
+            try {
+                const response = await axios.post(SCRIPT_URL, {
+                    name,
+                    email,
+                    message
+                });
+                
+                if (response.data.result === 'success') {
+                    statusDiv.textContent = 'Data successfully submitted to Google Sheets!';
+                    this.reset(); // Reset the form
+                } else {
+                    statusDiv.textContent = 'Error submitting data. Please try again.';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                statusDiv.textContent = 'An error occurred. Please try again later.';
+            }
+        });
+    </script>
+</body>
+</html>

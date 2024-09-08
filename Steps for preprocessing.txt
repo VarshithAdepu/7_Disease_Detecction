@@ -1,0 +1,76 @@
+Don’t modify the target side of evaluation datasets
+Before going further, there is a very important rule to follow when preprocessing datasets for machine translation:
+
+Never preprocessed the target side of the evaluation data!
+
+These are so-called “reference translations.” Since they are “references,” we shouldn’t touch them.
+
+There are several reasons for that. The main one is that the target side of the evaluation data should look like the data you want your system to generate.
+
+For instance, in some of the preprocessing steps, we will remove empty lines and tokenize the segments.
+
+You may want your system to return empty lines, for instance when translating empty text, and certainly, you don’t want to return tokenized texts as a final output of your machine translation systems.
+
+
+COMMANDS:
+
+1.Cleaning and Filtering
+	Step to be applied to: source and target sides of the training and validation data.
+
+For various reasons, publicly available parallel data may require some cleaning.
+
+->./clean-corpus-n.perl -max-word-length 50 train en ne train.clean 0 150
+
+An empty segment
+
+A segment longer than 150 words (or tokens)
+
+A high fertility
+
+Segments with a word (or token) containing more than 50 characters
+
+
+->wc -l train.clean.en train.clean.ne
+
+->git clone https://github.com/kpu/preprocess.git
+cd preprocess
+mkdir build
+cd build
+cmake ..
+make -j4
+
+
+->preprocess/build/bin/simple_cleaning -p train.clean.en train.clean.ne train.clean.pp.en train.clean.pp.ne
+
+
+->preprocess/build/bin/dedupe -p train.clean.pp.en train.clean.pp.ne train.clean.pp.dedup.en train.clean.pp.dedup.ne
+
+
+Step 2: Normalization
+
+->pip install sacremoses
+
+->sacremoses normalize < train.clean.pp.dedup.en > train.clean.pp.dedup.norm.en
+->sacremoses normalize < train.clean.pp.dedup.ne > train.clean.pp.dedup.norm.ne
+->sacremoses normalize –help
+
+Step 3: Tokenization:
+
+for english and nepali
+->python3 tokenizer_en_ne.py
+
+
+Step 4: Byte pair Encoding
+
+subword-nmt learn-bpe -s 8000 < tokenized_eng_sent.txt > codes.en
+subword-nmt apply-bpe -c codes.en < tokenized_eng_sent.txt > train.bpe.en
+subword-nmt apply-bpe -c codes.en < tokenized_eng_valid.txt > valid.bpe.en
+subword-nmt apply-bpe -c codes.en < test_en.txt > test.bpe.en
+
+subword-nmt learn-bpe -s 8000 < tokenized_nep_sent.txt > codes.ne
+subword-nmt apply-bpe -c codes.ne < tokenized_nep_sent.txt > train.bpe.ne
+subword-nmt apply-bpe -c codes.ne < tokenized_nep_valid.txt > valid.bpe.ne
+subword-nmt apply-bpe -c codes.ne < test_ne.txt > test.bpe.ne
+
+
+

@@ -1,0 +1,10 @@
+# Tokenize the data
+subword-nmt learn-bpe -s 8000 < train_en.txt > codes.en
+subword-nmt apply-bpe -c codes.en < train_en.txt > train.bpe.en
+subword-nmt apply-bpe -c codes.en < valid_en.txt > valid.bpe.en
+subword-nmt apply-bpe -c codes.en < test_en.txt > test.bpe.en
+
+subword-nmt learn-bpe -s 8000 < train_ne.txt > codes.ne
+subword-nmt apply-bpe -c codes.ne < train_ne.txt > train.bpe.ne
+subword-nmt apply-bpe -c codes.ne < valid_ne.txt > valid.bpe.ne
+subword-nmt apply-bpe -c codes.ne < test_ne.txt > test.bpe.ne
